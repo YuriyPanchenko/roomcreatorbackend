@@ -21,8 +21,8 @@ public class CheckRightDirect {
 
         rotationAngle += findL(currentPoint, firstPoint, mainPoint);
         if(rotationAngle < 0)
-            return true;
-        else return false;
+            return false;
+        else return true;
     }
     //we calculate the side by the Pythagorean theorem
     public static double getSide(Point a, Point b){
