@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import yuriy.exception.ResourceNotFoundException;
 import yuriy.repository.RoomRepository;
+import yuriy.service.CheckRoomService;
 import yuriy.service.SequenceGeneratorService;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -45,27 +46,36 @@ public class RoomController {
 	}
 
 	@PostMapping("/rooms")
-	public Room createEmployee(@RequestBody Room room) {
-		room.setId(sequenceGeneratorService.generateSequence(Room.SEQUENCE_NAME));
-		return roomRepository.save(room);
+	public String createEmployee(@RequestBody Room room) {
+		String message = CheckRoomService.message(room.getPoints());
+		if(message.equals("Legal.")){
+			room.setId(sequenceGeneratorService.generateSequence(Room.SEQUENCE_NAME));
+			roomRepository.save(room);
+		}
+		return message;
 	}
 
 	@PutMapping("/rooms/{id}")
-	public ResponseEntity<Room> updateEmployee(@PathVariable(value = "id") Long employeeId,
+	public String updateEmployee(@PathVariable(value = "id") Long roomId,
 											   @RequestBody Room roomDetails) throws ResourceNotFoundException {
-		Room room = roomRepository.findById(employeeId)
-				.orElseThrow(() -> new ResourceNotFoundException("Room not found for this id :: " + employeeId));
-
+		String message = CheckRoomService.message(roomDetails.getPoints());
+		if(message.equals("Legal.")){
+		Room room = roomRepository.findById(roomId)
+				.orElseThrow(() -> new ResourceNotFoundException("Room not found for this id :: " + roomId));
+		room.setId(roomDetails.getId());
+		room.setName(roomDetails.getName());
+		room.setPoints(roomDetails.getPoints());
 
 		final Room updatedRoom = roomRepository.save(room);
-		return ResponseEntity.ok(updatedRoom);
+		}
+		return message;
 	}
 
 	@DeleteMapping("/rooms/{id}")
-	public Map<String, Boolean> deleteEmployee(@PathVariable(value = "id") Long employeeId)
+	public Map<String, Boolean> deleteEmployee(@PathVariable(value = "id") Long roomId)
 			throws ResourceNotFoundException {
-		Room room = roomRepository.findById(employeeId)
-				.orElseThrow(() -> new ResourceNotFoundException("Room not found for this id :: " + employeeId));
+		Room room = roomRepository.findById(roomId)
+				.orElseThrow(() -> new ResourceNotFoundException("Room not found for this id :: " + roomId));
 
 		roomRepository.delete(room);
 		Map<String, Boolean> response = new HashMap<>();
